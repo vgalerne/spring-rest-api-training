@@ -26,6 +26,9 @@ public class Item {
 
 	public Item(Long id, String name, Integer quantity) {
 		super();
+		this.id = id;
+		this.name = name;
+		this.quantity = quantity;
 	}
 
 	public Long getId() {
