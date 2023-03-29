@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
@@ -13,10 +14,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.sandbox.springrestapitraining.model.Item;
 import ca.sandbox.springrestapitraining.service.ItemService;
@@ -29,7 +34,13 @@ public class ItemControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 
+	/**
+	 * Tests for GET all items
+	 */
 	@Test
 	public void GetAllItems_SomeItemsArePresent_Expected200() throws Exception {
 
@@ -48,6 +59,9 @@ public class ItemControllerTest {
 			.showItems();
 	}
 
+	/**
+	 * Tests for GET item by id
+	 */
 	@Test
 	public void GetItemById_ItemIsPresent_Expected200() throws Exception {
 
@@ -84,6 +98,33 @@ public class ItemControllerTest {
 			.findItem(givenId);
 	}
 
+	/**
+	 * Tests for POST item
+	 */
+	@Test
+	public void PostItem_ItemIsNotPresent_Expected200() throws Exception {
+
+		Item item = getDefaultItem();
+
+		// When
+		when(service.addItem(item))
+			.thenReturn(item);
+
+		// Then
+		mockMvc.perform(post("/items")
+			.content(objectMapper.writeValueAsString(item))
+			.contentType(MediaType.APPLICATION_JSON)
+			.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isCreated());
+
+		// Verify
+		verify(service, times(1))
+			.addItem(Mockito.any(Item.class));
+	}
+
+	/**
+	 * Tests for DELETE item by id
+	 */
 	@Test
 	public void DeleteItemById_ItemIsPresent_Expected200() throws Exception {
 
